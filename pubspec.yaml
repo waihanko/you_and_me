@@ -23,6 +23,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  percent_indicator: ^2.1.1+1
+  flutter_switch: ^0.2.0
+  intl: ^0.16.1
+  image_picker: ^0.6.6+5
+  shared_preferences: ^0.5.12+4
+  path_provider: ^1.6.24
+
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -76,3 +84,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat-Regular.ttf
+        - asset: fonts/Montserrat-ExtraBold.ttf
+          style: italic
