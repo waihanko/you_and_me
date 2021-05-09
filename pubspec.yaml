@@ -25,11 +25,11 @@ dependencies:
     sdk: flutter
   percent_indicator: ^2.1.1+1
   flutter_switch: ^0.2.0
-  intl: ^0.16.1
+  intl: ^0.17.0
   image_picker: ^0.6.6+5
   shared_preferences: ^0.5.12+4
   path_provider: ^1.6.24
-
+  jiffy: ^4.1.0
 
 
 

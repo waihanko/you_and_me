@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:you_and_me/page_setting.dart';
+import 'package:you_and_me/resources/string.dart';
+import 'package:you_and_me/utils.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -17,15 +18,33 @@ class _MyHomePageState extends State<MyHomePage> {
   File _personOneImage;
   File _personTwoImage;
   DateTime _selectedDate = DateTime.now();
+  bool _isShowTotalDate = false;
+  RelationShipTime relationShipTime = new RelationShipTime();
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
   @override
   void initState() {
     super.initState();
-    _getImage("image1", 1);
-    _getImage("image2", 2);
-    _getRelationTime();
-
+    Future.delayed(
+      Duration(milliseconds: 100),
+      () {
+        setState(() {
+          getImage(SHARE_PREF_PERSON_1_IMAGE)
+              .then((value) => _personOneImage = value);
+          getImage(SHARE_PREF_PERSON_2_IMAGE)
+              .then((value) => _personTwoImage = value);
+          getRelationTime(SHARE_PREF_RS_DATE).then(
+            (value) => {
+              _selectedDate = value,
+              relationShipTime = getDifferentYear(_selectedDate),
+            },
+          );
+          getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
+                (value) => _isShowTotalDate = value,
+          );
+        });
+      },
+    );
   }
 
   @override
@@ -57,7 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             )
-            // Icon(Icons.settings, color: Color(0xfffd7f75))
           ],
         ),
         body: Container(
@@ -92,12 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 Positioned(
                     right: 0,
                     bottom: 60,
-                    child:
-                    personPhoto("images/male.jpg", _personTwoImage, id: 1)),
+                    child: personPhoto("images/male.jpg", _personTwoImage,
+                        SHARE_PREF_PERSON_1_IMAGE)),
                 Positioned(
                     top: 60,
                     child: personPhoto("images/female.jpg", _personOneImage,
-                        id: 1)),
+                        SHARE_PREF_PERSON_2_IMAGE)),
                 Positioned(top: 0, left: 30, child: loveCircle()),
                 Positioned(
                     top: 40,
@@ -141,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  personPhoto(String image, File _personImage, {int id = 1}) {
+  personPhoto(String image, File _personImage, String imageName) {
     return GestureDetector(
       onTap: () => {},
       child: Card(
@@ -183,14 +201,34 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 12,
             ),
-            Text(
-              "1,761 days",
-              style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: "Montserrat",
-                  color: Color(0xffff495a)),
-            ),
+            _isShowTotalDate
+                ? CommonTextView(
+                    getTotalDate(_selectedDate),
+                    Color(0xffff495a),
+                    fontWeight: FontWeight.w700,
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RelationYMWDItem(relationShipTime.years.toString(),
+                          getExtension(relationShipTime.years, "Year")),
+                      SizedBox(
+                        width: 12.0,
+                      ),
+                      RelationYMWDItem(relationShipTime.months.toString(),
+                          getExtension(relationShipTime.months, "Month")),
+                      SizedBox(
+                        width: 12.0,
+                      ),
+                      RelationYMWDItem(relationShipTime.weeks.toString(),
+                          getExtension(relationShipTime.weeks, "Week")),
+                      SizedBox(
+                        width: 12.0,
+                      ),
+                      RelationYMWDItem(relationShipTime.days.toString(),
+                          getExtension(relationShipTime.days, "Day")),
+                    ],
+                  ),
             SizedBox(
               height: 12,
             ),
@@ -252,35 +290,77 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _navigateToNextScreen(BuildContext context) async {
-    await Navigator.push(
+    bool result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Setting()),
     );
-    setState(() {
-      _getImage("image1", 1);
-      _getImage("image2", 2);
-    });
+    if (result == true) {
+      setState(
+        () {
+          getImage(SHARE_PREF_PERSON_1_IMAGE)
+              .then((value) => _personOneImage = value);
+          getImage(SHARE_PREF_PERSON_2_IMAGE)
+              .then((value) => _personTwoImage = value);
+          getRelationTime(SHARE_PREF_RS_DATE).then((value) => {
+                _selectedDate = value,
+                relationShipTime = getDifferentYear(_selectedDate),
+              });
+          getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
+            (value) => _isShowTotalDate = value,
+          );
+        },
+      );
+    }
   }
+}
 
-  _getImage(String key, int id) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if (prefs.getString(key) != null && id == 1) {
-        _personOneImage = File(prefs.getString(key));
-      } else if (prefs.getString(key) != null && id == 2) {
-        _personTwoImage = File(prefs.getString(key));
-      }
-    });
+class RelationYMWDItem extends StatelessWidget {
+  final text, data;
+
+  RelationYMWDItem(this.text, this.data);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CommonTextView(
+          text,
+          Color(0xffff495a),
+          fontWeight: FontWeight.w700,
+        ),
+        CommonTextView(
+          data,
+          Color(0xff7E7175),
+          textSize: 12,
+        ),
+      ],
+    );
   }
+}
 
-  _getRelationTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      if (prefs.getString("relationship_time") != null) {
-        _selectedDate = DateFormat("yyyy-MM-dd HH:mm:ss")
-            .parse(prefs.getString("relationship_time")) ??
-            DateTime.now();
-      }
-    });
+class CommonTextView extends StatelessWidget {
+  final String text;
+  final double textSize;
+  final Color textColor;
+  final FontWeight fontWeight;
+
+  CommonTextView(
+    this.text,
+    this.textColor, {
+    this.textSize = 32,
+    this.fontWeight = FontWeight.normal,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+          fontSize: textSize,
+          fontWeight: fontWeight,
+          fontFamily: "Montserrat",
+          color: textColor),
+    );
   }
 }
