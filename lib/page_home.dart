@@ -17,8 +17,12 @@ class _MyHomePageState extends State<MyHomePage> {
   BuildContext context;
   File _personOneImage;
   File _personTwoImage;
+  int progressStartValue, progressEndValue;
+  double progressPercent = 0;
+  int totalRelationDays = 0;
+
   DateTime _selectedDate = DateTime.now();
-  bool _isShowTotalDate = false;
+  bool _isShowTotalDate;
   RelationShipTime relationShipTime = new RelationShipTime();
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
@@ -36,11 +40,16 @@ class _MyHomePageState extends State<MyHomePage> {
           getRelationTime(SHARE_PREF_RS_DATE).then(
             (value) => {
               _selectedDate = value,
+              totalRelationDays = getTotalDate(_selectedDate),
               relationShipTime = getDifferentYear(_selectedDate),
+              progressStartValue = getProgressStartValue(),
+              progressEndValue = getProgressEndValue(),
+              progressPercent = (totalRelationDays - progressStartValue) /
+                  (progressEndValue - progressStartValue)
             },
           );
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
-                (value) => _isShowTotalDate = value,
+            (value) => _isShowTotalDate = value,
           );
         });
       },
@@ -88,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 flex: 2,
                 child: coupleImages(),
               ),
-              Expanded(flex: 1, child: relationshipTime()),
+              Expanded(flex: 1, child: relationshipTimeView()),
             ],
           ),
         ),
@@ -185,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  relationshipTime() {
+  relationshipTimeView() {
     return Center(
       child: Container(
         child: Column(
@@ -201,11 +210,10 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 12,
             ),
-            _isShowTotalDate
-                ? CommonTextView(
-                    getTotalDate(_selectedDate),
-                    Color(0xffff495a),
-                    fontWeight: FontWeight.w700,
+            _isShowTotalDate != null && _isShowTotalDate
+                ? RelationYMWDItem(
+                    totalRelationDays.toString(),
+                    getExtension(getTotalDate(_selectedDate), "Day"),
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -252,20 +260,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       SizedBox(
                         width: 4,
                       ),
-                      Text(
-                        "100",
-                        style: TextStyle(
-                          color: Color(0xff7E7175),
-                          fontFamily: "Montserrat",
-                        ),
+                      CommonTextView(
+                        progressStartValue.toString(),
+                        Color(0xff7E7175),
+                        textSize: 14,
                       ),
                       Spacer(),
-                      Text(
-                        "200",
-                        style: TextStyle(
-                          color: Color(0xff7E7175),
-                          fontFamily: "Montserrat",
-                        ),
+                      CommonTextView(
+                        progressEndValue.toString(),
+                        Color(0xff7E7175),
+                        textSize: 14,
                       ),
                       SizedBox(width: 8),
                     ],
@@ -277,7 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     lineHeight: 4.0,
                     progressColor: Color(0xffff495a),
                     backgroundColor: Color(0xfff6dbd7),
-                    percent: 0.7,
+                    percent: progressPercent,
                     animation: true,
                   ),
                 ],
@@ -303,7 +307,12 @@ class _MyHomePageState extends State<MyHomePage> {
               .then((value) => _personTwoImage = value);
           getRelationTime(SHARE_PREF_RS_DATE).then((value) => {
                 _selectedDate = value,
+                totalRelationDays = getTotalDate(_selectedDate),
                 relationShipTime = getDifferentYear(_selectedDate),
+                progressStartValue = getProgressStartValue(),
+                progressEndValue = getProgressEndValue(),
+                progressPercent = (totalRelationDays - progressStartValue) /
+                    (progressEndValue - progressStartValue)
               });
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
             (value) => _isShowTotalDate = value,
@@ -311,6 +320,14 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       );
     }
+  }
+
+  int getProgressStartValue() {
+    return (totalRelationDays ~/ 100 * 100);
+  }
+
+  int getProgressEndValue() {
+    return (totalRelationDays ~/ 100 * 100) + 100;
   }
 }
 
@@ -323,11 +340,15 @@ class RelationYMWDItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         CommonTextView(
           text,
           Color(0xffff495a),
           fontWeight: FontWeight.w700,
+        ),
+        SizedBox(
+          width: 2.0,
         ),
         CommonTextView(
           data,

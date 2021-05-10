@@ -40,10 +40,9 @@ Future<DateTime> getRelationTime(String sharePrefRSDate) async {
   }
 }
 
-String getTotalDate(DateTime startDate) {
+int getTotalDate(DateTime startDate) {
   DateTime endDate = DateTime.now();
-  int days = endDate.difference(startDate).inDays + 1;
-  return "$days" + getExtension(days, "Day");
+  return endDate.difference(startDate).inDays;
 }
 
 String getExtension(int tempNum, String text) {

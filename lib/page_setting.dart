@@ -6,7 +6,8 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:you_and_me/GenerateColor.dart';
+import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
 
@@ -23,6 +24,7 @@ class _SettingState extends State<Setting> {
   DateTime _selectedDate = DateTime.now();
   File _personOneImage;
   File _personTwoImage;
+  Color _bgColor;
 
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
@@ -41,7 +43,6 @@ class _SettingState extends State<Setting> {
               .then((value) => _selectedDate = value);
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS)
               .then((value) => _isShowDaySwitched = value);
-          print(_isShowDaySwitched.toString());
         });
       },
     );
@@ -92,6 +93,7 @@ class _SettingState extends State<Setting> {
           ),
           body: Container(
             padding: EdgeInsets.symmetric(horizontal: 18),
+            //color: Color(0xfffff6f5),
             color: Color(0xfffff6f5),
             child: Column(
               children: [
@@ -195,12 +197,15 @@ class _SettingState extends State<Setting> {
                               toggleSize: 16.0,
                               activeColor: Color(0xfffd7f75),
                               inactiveColor: Color(0xfffdaaa3),
-                              value: _isShowDaySwitched,
+                              value: _isShowDaySwitched == null
+                                  ? false
+                                  : _isShowDaySwitched,
                               borderRadius: 30.0,
                               onToggle: (val) {
                                 setState(() {
                                   _isShowDaySwitched = val;
-                                  setBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS, _isShowDaySwitched);
+                                  setBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS,
+                                      _isShowDaySwitched);
                                 });
                               },
                             ),
@@ -227,35 +232,6 @@ class _SettingState extends State<Setting> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        // SizedBox(
-                        //   height: 18,
-                        // ),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       "Notification",
-                        //       style: TextStyle(
-                        //         fontSize: 14,
-                        //       ),
-                        //     ),
-                        //     Spacer(),
-                        //     FlutterSwitch(
-                        //       width: 40.0,
-                        //       height: 20.0,
-                        //       toggleSize: 16.0,
-                        //       activeColor: Color(0xfffd7f75),
-                        //       inactiveColor: Color(0xfffdaaa3),
-                        //       value: isNotificationSwitched,
-                        //       borderRadius: 30.0,
-                        //       onToggle: (val) {
-                        //         setState(() {
-                        //           isNotificationSwitched = val;
-                        //           _setNotificationSwitch("notification", val);
-                        //         });
-                        //       },
-                        //     ),
-                        //   ],
-                        // ),
                         SizedBox(
                           height: 16,
                         ),
@@ -336,41 +312,40 @@ class _SettingState extends State<Setting> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _themeItem(Colors.deepOrange, isHighlight: true),
+                            ThemeSelectorItem(
+                              Colors.deepOrange,
+                              changeThemeData,
+                              isHighlight: true,
+                              themeColorData: ThemeType.THEME_PINK,
+                            ),
                             SizedBox(
                               width: 8,
                             ),
-                            _themeItem(Colors.blue),
+                            ThemeSelectorItem(
+                              Colors.blue,
+                              changeThemeData,
+                              themeColorData: ThemeType.THEME_BLUE,
+                            ),
                             SizedBox(
                               width: 8,
                             ),
-                            _themeItem(Colors.green),
+                            ThemeSelectorItem(
+                              Colors.green,
+                              changeThemeData,
+                              themeColorData: ThemeType.THEME_GREEN,
+                            ),
                             SizedBox(
                               width: 8,
                             ),
-                            _themeItem(Colors.purple),
+                            ThemeSelectorItem(
+                              Colors.purple,
+                              changeThemeData,
+                              themeColorData: ThemeType.THEME_PURPLE,
+                            ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Spacer(),
-                Container(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: FlatButton(
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        minWidth: MediaQuery.of(context).size.width,
-                        color: Colors.white,
-                        splashColor: Color(0xfffdaaa3),
-                        onPressed: () {},
-                        child: Text(
-                          "Clear Default",
-                          style:
-                              TextStyle(color: Color(0xff7E7175), fontSize: 16),
-                        )),
                   ),
                 ),
               ],
@@ -456,17 +431,47 @@ class _SettingState extends State<Setting> {
     );
   }
 
-
+  changeThemeData(ThemeType themeColorData) {
+    GenerateColors generateColors = GenerateColors(themeColorData);
+    setState(() {
+      _bgColor = generateColors.getBgColor();
+    });
+  }
 }
 
-_themeItem(MaterialColor color, {bool isHighlight = false}) {
-  return Container(
-    width: 40,
-    height: 40,
-    decoration: new BoxDecoration(
-      color: color,
-      borderRadius: new BorderRadius.all(Radius.circular(12.0)),
-      border: isHighlight ? Border.all(color: Colors.black) : null,
-    ),
-  );
+class ThemeSelectorItem extends StatefulWidget {
+  final ThemeType themeColorData;
+  final MaterialColor color;
+  final Function changeThemeData;
+  final bool isHighlight;
+
+  ThemeSelectorItem(
+    this.color,
+    this.changeThemeData, {
+    this.isHighlight = false,
+    this.themeColorData = ThemeType.THEME_PINK,
+  });
+
+  @override
+  _ThemeSelectorItemState createState() => _ThemeSelectorItemState();
+}
+
+class _ThemeSelectorItemState extends State<ThemeSelectorItem> {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        widget.changeThemeData(widget.themeColorData);
+      },
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: new BoxDecoration(
+          color: widget.color,
+          borderRadius: new BorderRadius.all(Radius.circular(12.0)),
+          border: widget.isHighlight ? Border.all(color: Colors.black) : null,
+        ),
+      ),
+    );
+  }
 }
