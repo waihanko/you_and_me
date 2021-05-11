@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:you_and_me/GenerateColor.dart';
+import 'package:you_and_me/generate_color.dart';
 import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
@@ -25,6 +26,11 @@ class _SettingState extends State<Setting> {
   File _personOneImage;
   File _personTwoImage;
   Color _bgColor;
+  Color _statusBarColor;
+  Color _cardColor;
+  Color _totalDayColor;
+  Color _iconColorLight;
+  Color _iconColorDeep;
 
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
@@ -44,12 +50,15 @@ class _SettingState extends State<Setting> {
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS)
               .then((value) => _isShowDaySwitched = value);
         });
+        changeThemeData(ThemeType.THEME_PINK);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: _statusBarColor));
     return SafeArea(
       child: WillPopScope(
         onWillPop: () {
@@ -60,18 +69,18 @@ class _SettingState extends State<Setting> {
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             elevation: 0,
-            backgroundColor: Color(0xfffff6f5),
+            backgroundColor: _bgColor,
             leading: ClipOval(
               child: Material(
-                color: Color(0xfffff6f5),
+                color: _bgColor,
                 child: InkWell(
-                  splashColor: Color(0xfffff6f5),
+                  splashColor: _bgColor,
                   child: SizedBox(
                       width: 56,
                       height: 56,
                       child: Icon(
                         Icons.arrow_back_ios,
-                        color: Color(0xfffdaaa3),
+                        color: _iconColorLight,
                         size: 18,
                       )),
                   onTap: () {
@@ -93,8 +102,7 @@ class _SettingState extends State<Setting> {
           ),
           body: Container(
             padding: EdgeInsets.symmetric(horizontal: 18),
-            //color: Color(0xfffff6f5),
-            color: Color(0xfffff6f5),
+            color: _cardColor,
             child: Column(
               children: [
                 Card(
@@ -154,21 +162,21 @@ class _SettingState extends State<Setting> {
                               style: TextStyle(
                                   fontSize: 14,
                                   fontFamily: "Montserrat",
-                                  color: Color(0xffff495a),
+                                  color: _totalDayColor,
                                   fontWeight: FontWeight.w600),
                             ),
                             Spacer(),
                             ClipOval(
                               child: Material(
-                                color: Color(0xfffff6f5),
+                                color: _bgColor,
                                 child: InkWell(
-                                  splashColor: Color(0xfffff6f5),
+                                  splashColor: _bgColor,
                                   child: SizedBox(
                                       width: 38,
                                       height: 38,
                                       child: Icon(
                                         Icons.calendar_today,
-                                        color: Color(0xfffdaaa3),
+                                        color: _iconColorLight,
                                         size: 16,
                                       )),
                                   onTap: () {
@@ -195,8 +203,8 @@ class _SettingState extends State<Setting> {
                               width: 40.0,
                               height: 20.0,
                               toggleSize: 16.0,
-                              activeColor: Color(0xfffd7f75),
-                              inactiveColor: Color(0xfffdaaa3),
+                              activeColor: _iconColorDeep,
+                              inactiveColor: _iconColorLight,
                               value: _isShowDaySwitched == null
                                   ? false
                                   : _isShowDaySwitched,
@@ -248,8 +256,8 @@ class _SettingState extends State<Setting> {
                               width: 40.0,
                               height: 20.0,
                               toggleSize: 16.0,
-                              activeColor: Color(0xfffd7f75),
-                              inactiveColor: Color(0xfffdaaa3),
+                              activeColor: _iconColorDeep,
+                              inactiveColor: _iconColorLight,
                               value: isRemindMeSwitched,
                               borderRadius: 30.0,
                               onToggle: (val) {
@@ -277,8 +285,8 @@ class _SettingState extends State<Setting> {
                               width: 40.0,
                               height: 20.0,
                               toggleSize: 16.0,
-                              activeColor: Color(0xfffd7f75),
-                              inactiveColor: Color(0xfffdaaa3),
+                              activeColor: _iconColorDeep,
+                              inactiveColor: _iconColorLight,
                               value: isWidgetSwitched,
                               borderRadius: 30.0,
                               onToggle: (val) {
@@ -392,12 +400,12 @@ class _SettingState extends State<Setting> {
           return Theme(
             data: ThemeData.light().copyWith(
               colorScheme: ColorScheme.light(
-                onSurface: Color(0xffff495a),
-                primary: Color(0xffff495a),
-                secondaryVariant: Color(0xffff495a),
-                secondary: Color(0xffff495a),
+                onSurface: _statusBarColor,
+                primary: _statusBarColor,
+                secondaryVariant: _statusBarColor,
+                secondary: _statusBarColor,
               ),
-              dialogBackgroundColor: Colors.white,
+              dialogBackgroundColor: _bgColor,
             ),
             child: child,
           );
@@ -434,7 +442,12 @@ class _SettingState extends State<Setting> {
   changeThemeData(ThemeType themeColorData) {
     GenerateColors generateColors = GenerateColors(themeColorData);
     setState(() {
-      _bgColor = generateColors.getBgColor();
+      _bgColor = generateColors.getColor(BODY_BG_COLOR);
+      _statusBarColor = generateColors.getColor(STATUS_BAR_COLOR);
+      _iconColorDeep = generateColors.getColor(ICON_COLOR_DEEP);
+      _iconColorLight = generateColors.getColor(ICON_COLOR_LIGHT);
+      _totalDayColor = generateColors.getColor(TOTAL_DAY_COLOR);
+      _cardColor = generateColors.getColor(CARD_COLOR);
     });
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:you_and_me/resources/colors.dart';
 import 'package:you_and_me/resources/enum.dart';
 
 class GenerateColors {
@@ -6,18 +7,18 @@ class GenerateColors {
 
   GenerateColors(this.themeColorData);
 
-  getBgColor() {
+  getColor(String colorType) {
     if (themeColorData == ThemeType.THEME_PINK) {
-      return Colors.pink;
+      return pinkColor[colorType];
     }
     if (themeColorData == ThemeType.THEME_BLUE) {
-      return Colors.blue;
+      return blueColor[colorType];
     }
     if (themeColorData == ThemeType.THEME_GREEN) {
-      return Colors.green;
+      return greenColor[colorType];
     }
     if (themeColorData == ThemeType.THEME_PURPLE) {
-      return Colors.deepPurple;
+      return purpleColor[colorType];
     }
   }
 
