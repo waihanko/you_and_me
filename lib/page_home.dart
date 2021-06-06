@@ -117,10 +117,14 @@ class _MyHomePageState extends State<MyHomePage> {
               clipBehavior: Clip.antiAliasWithSaveLayer,
               children: <Widget>[
                 Positioned(
-                    right: 0,
-                    bottom: 60,
-                    child: personPhoto("images/male.jpg", _personTwoImage,
-                        SHARE_PREF_PERSON_1_IMAGE)),
+                  right: 0,
+                  bottom: 60,
+                  child: personPhoto(
+                    "images/male.jpg",
+                    _personTwoImage,
+                    SHARE_PREF_PERSON_1_IMAGE,
+                  ),
+                ),
                 Positioned(
                     top: 60,
                     child: personPhoto("images/female.jpg", _personOneImage,
@@ -176,20 +180,32 @@ class _MyHomePageState extends State<MyHomePage> {
           borderRadius: BorderRadius.all(Radius.circular(12.0)),
         ),
         elevation: 1.0,
-        child: Container(
-          width: 160,
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(12.0)),
-            image: DecorationImage(
-              image: _personImage == null
-                  ? AssetImage(image)
-                  : FileImage(_personImage),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-        ),
+        child: _personImage == null
+            ? Container(
+                width: 160,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                  color: Colors.yellow
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.person,
+                  ),
+                ),
+              )
+            : Container(
+                width: 160,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                  image: DecorationImage(
+                    image: FileImage(_personImage),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                ),
+              ),
       ),
     );
   }
