@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:you_and_me/page_setting.dart';
+import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
+
+import 'generate_color.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -20,6 +23,11 @@ class _MyHomePageState extends State<MyHomePage> {
   int progressStartValue, progressEndValue;
   double progressPercent = 0;
   int totalRelationDays = 0;
+  Color _totalDayColor;
+  Color _iconColorLight;
+  Color _progressBarColor = Colors.deepPurple;
+  Color _progressBarBgColor = Colors.red;
+  Color _statusBarColor;
 
   DateTime _selectedDate = DateTime.now();
   bool _isShowTotalDate;
@@ -51,6 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
             (value) => _isShowTotalDate = value,
           );
+          getPrefInt(SHARE_PREF_THEME).then(
+            (value) => changeThemeData(
+                value != null ? ThemeType.values[value] : ThemeType.THEME_PINK),
+          );
         });
       },
     );
@@ -60,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     this.context = context;
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Color(0xfffd7f75)));
+        SystemUiOverlayStyle(statusBarColor: _statusBarColor));
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -71,13 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Material(
                 color: Colors.white,
                 child: InkWell(
-                  splashColor: Color(0xfffdaaa3).withOpacity(0.3),
+                  splashColor: _progressBarBgColor,
                   child: SizedBox(
                       width: 56,
                       height: 56,
                       child: Icon(
                         Icons.settings,
-                        color: Color(0xfffdaaa3),
+                        color: _iconColorLight,
                       )),
                   onTap: () {
                     _navigateToNextScreen(context);
@@ -103,6 +115,18 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  changeThemeData(ThemeType themeColorData) {
+    GenerateColors generateColors = GenerateColors(themeColorData);
+    setState(() {
+      _statusBarColor = generateColors.getColor(STATUS_BAR_COLOR);
+      _progressBarColor = generateColors.getColor(PROGRESS_COLOR);
+     _progressBarBgColor = generateColors.getColor(PROGRESS_BG_COLOR);
+      _iconColorLight = generateColors.getColor(ICON_COLOR_LIGHT);
+      _totalDayColor = generateColors.getColor(TOTAL_DAY_COLOR);
+    });
+    setPrefInt(SHARE_PREF_THEME, themeColorData.index);
   }
 
   coupleImages() {
@@ -164,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
           width: width, height: height, //customisable size of 'button'
           child: Icon(
             Icons.favorite,
-            color: Color(0xfffdaaa3),
+            color: _iconColorLight,
             size: iconSize,
           ),
         ),
@@ -230,27 +254,40 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? RelationYMWDItem(
                     totalRelationDays.toString(),
                     getExtension(getTotalDate(_selectedDate), "Day"),
+                    _totalDayColor,
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      RelationYMWDItem(relationShipTime.years.toString(),
-                          getExtension(relationShipTime.years, "Year")),
+                      RelationYMWDItem(
+                        relationShipTime.years.toString(),
+                        getExtension(relationShipTime.years, "Year"),
+                        _totalDayColor,
+                      ),
                       SizedBox(
                         width: 12.0,
                       ),
-                      RelationYMWDItem(relationShipTime.months.toString(),
-                          getExtension(relationShipTime.months, "Month")),
+                      RelationYMWDItem(
+                        relationShipTime.months.toString(),
+                        getExtension(relationShipTime.months, "Month"),
+                        _totalDayColor,
+                      ),
                       SizedBox(
                         width: 12.0,
                       ),
-                      RelationYMWDItem(relationShipTime.weeks.toString(),
-                          getExtension(relationShipTime.weeks, "Week")),
+                      RelationYMWDItem(
+                        relationShipTime.weeks.toString(),
+                        getExtension(relationShipTime.weeks, "Week"),
+                        _totalDayColor,
+                      ),
                       SizedBox(
                         width: 12.0,
                       ),
-                      RelationYMWDItem(relationShipTime.days.toString(),
-                          getExtension(relationShipTime.days, "Day")),
+                      RelationYMWDItem(
+                        relationShipTime.days.toString(),
+                        getExtension(relationShipTime.days, "Day"),
+                        _totalDayColor,
+                      ),
                     ],
                   ),
             SizedBox(
@@ -295,11 +332,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   LinearPercentIndicator(
                     lineHeight: 4.0,
-                    progressColor: Color(0xffff495a),
-                    backgroundColor: Color(0xfff6dbd7),
+                    progressColor: _progressBarColor,
+                    backgroundColor: _progressBarBgColor,
                     percent: progressPercent,
                     animation: true,
-                  ),
+                  ) ,
                 ],
               ),
             )
@@ -333,6 +370,9 @@ class _MyHomePageState extends State<MyHomePage> {
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
             (value) => _isShowTotalDate = value,
           );
+          getPrefInt(SHARE_PREF_THEME).then(
+            (value) => changeThemeData(ThemeType.values[value]),
+          );
         },
       );
     }
@@ -348,9 +388,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class RelationYMWDItem extends StatelessWidget {
-  final text, data;
+  final text, data, totalDayColor;
 
-  RelationYMWDItem(this.text, this.data);
+  RelationYMWDItem(this.text, this.data, this.totalDayColor);
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +400,7 @@ class RelationYMWDItem extends StatelessWidget {
       children: [
         CommonTextView(
           text,
-          Color(0xffff495a),
+          totalDayColor,
           fontWeight: FontWeight.w700,
         ),
         SizedBox(

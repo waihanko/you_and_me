@@ -12,6 +12,8 @@ import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
 
+import 'resources/colors.dart';
+
 class Setting extends StatefulWidget {
   @override
   _SettingState createState() => _SettingState();
@@ -50,7 +52,10 @@ class _SettingState extends State<Setting> {
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS)
               .then((value) => _isShowDaySwitched = value);
         });
-        changeThemeData(ThemeType.THEME_PINK);
+        getPrefInt(SHARE_PREF_THEME).then(
+          (value) => changeThemeData(
+              value != null ? ThemeType.values[value] : ThemeType.THEME_PINK),
+        );
       },
     );
   }
@@ -321,16 +326,15 @@ class _SettingState extends State<Setting> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ThemeSelectorItem(
-                              Colors.deepOrange,
+                              pinkColor[PROGRESS_COLOR],
                               changeThemeData,
-                              isHighlight: true,
                               themeColorData: ThemeType.THEME_PINK,
                             ),
                             SizedBox(
                               width: 8,
                             ),
                             ThemeSelectorItem(
-                              Colors.blue,
+                              blueColor[PROGRESS_COLOR],
                               changeThemeData,
                               themeColorData: ThemeType.THEME_BLUE,
                             ),
@@ -338,7 +342,7 @@ class _SettingState extends State<Setting> {
                               width: 8,
                             ),
                             ThemeSelectorItem(
-                              Colors.green,
+                              greenColor[PROGRESS_COLOR],
                               changeThemeData,
                               themeColorData: ThemeType.THEME_GREEN,
                             ),
@@ -346,7 +350,7 @@ class _SettingState extends State<Setting> {
                               width: 8,
                             ),
                             ThemeSelectorItem(
-                              Colors.purple,
+                              purpleColor[PROGRESS_COLOR],
                               changeThemeData,
                               themeColorData: ThemeType.THEME_PURPLE,
                             ),
@@ -449,19 +453,18 @@ class _SettingState extends State<Setting> {
       _totalDayColor = generateColors.getColor(TOTAL_DAY_COLOR);
       _cardColor = generateColors.getColor(CARD_COLOR);
     });
+    setPrefInt(SHARE_PREF_THEME, themeColorData.index);
   }
 }
 
 class ThemeSelectorItem extends StatefulWidget {
   final ThemeType themeColorData;
-  final MaterialColor color;
+  final Color color;
   final Function changeThemeData;
-  final bool isHighlight;
 
   ThemeSelectorItem(
     this.color,
     this.changeThemeData, {
-    this.isHighlight = false,
     this.themeColorData = ThemeType.THEME_PINK,
   });
 
@@ -482,7 +485,6 @@ class _ThemeSelectorItemState extends State<ThemeSelectorItem> {
         decoration: new BoxDecoration(
           color: widget.color,
           borderRadius: new BorderRadius.all(Radius.circular(12.0)),
-          border: widget.isHighlight ? Border.all(color: Colors.black) : null,
         ),
       ),
     );

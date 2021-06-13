@@ -29,6 +29,16 @@ setRelationTime(DateTime time) async {
   await prefs.setString(SHARE_PREF_RS_DATE, time.toString());
 }
 
+setPrefInt(String key, int data) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setInt(key, data);
+}
+
+Future<int> getPrefInt(String key) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getInt(key);
+}
+
 Future<DateTime> getRelationTime(String sharePrefRSDate) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.getString(SHARE_PREF_RS_DATE) != null) {
