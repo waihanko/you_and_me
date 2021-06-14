@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:you_and_me/page_setting.dart';
+import 'package:you_and_me/preson_placeholder.dart';
 import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
@@ -23,11 +25,16 @@ class _MyHomePageState extends State<MyHomePage> {
   int progressStartValue, progressEndValue;
   double progressPercent = 0;
   int totalRelationDays = 0;
+  String _person1Name;
+  String _person2Name;
   Color _totalDayColor;
   Color _iconColorLight;
   Color _progressBarColor = Colors.deepPurple;
   Color _progressBarBgColor = Colors.red;
   Color _statusBarColor;
+  Color _placeHolderBgColor;
+  Color _placeHolderBorderColor;
+  Color _placeHolderIconColor;
 
   DateTime _selectedDate = DateTime.now();
   bool _isShowTotalDate;
@@ -40,30 +47,37 @@ class _MyHomePageState extends State<MyHomePage> {
     Future.delayed(
       Duration(milliseconds: 100),
       () {
-        setState(() {
-          getImage(SHARE_PREF_PERSON_1_IMAGE)
-              .then((value) => _personOneImage = value);
-          getImage(SHARE_PREF_PERSON_2_IMAGE)
-              .then((value) => _personTwoImage = value);
-          getRelationTime(SHARE_PREF_RS_DATE).then(
-            (value) => {
-              _selectedDate = value,
-              totalRelationDays = getTotalDate(_selectedDate),
-              relationShipTime = getDifferentYear(_selectedDate),
-              progressStartValue = getProgressStartValue(),
-              progressEndValue = getProgressEndValue(),
-              progressPercent = (totalRelationDays - progressStartValue) /
-                  (progressEndValue - progressStartValue)
-            },
-          );
-          getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
-            (value) => _isShowTotalDate = value,
-          );
-          getPrefInt(SHARE_PREF_THEME).then(
-            (value) => changeThemeData(
-                value != null ? ThemeType.values[value] : ThemeType.THEME_PINK),
-          );
-        });
+        setState(
+          () {
+            getImage(SHARE_PREF_PERSON_1_IMAGE)
+                .then((value) => _personOneImage = value);
+            getImage(SHARE_PREF_PERSON_2_IMAGE)
+                .then((value) => _personTwoImage = value);
+            getRelationTime(SHARE_PREF_RS_DATE).then(
+              (value) => {
+                _selectedDate = value,
+                totalRelationDays = getTotalDate(_selectedDate),
+                relationShipTime = getDifferentYear(_selectedDate),
+                progressStartValue = getProgressStartValue(),
+                progressEndValue = getProgressEndValue(),
+                progressPercent = (totalRelationDays - progressStartValue) /
+                    (progressEndValue - progressStartValue)
+              },
+            );
+            getString(SHARE_PREF_PERSON_1_NAME)
+                .then((value) => {_person1Name = value});
+            getString(SHARE_PREF_PERSON_2_NAME)
+                .then((value) => {_person2Name = value});
+            getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
+              (value) => _isShowTotalDate = value,
+            );
+            getPrefInt(SHARE_PREF_THEME).then(
+              (value) => changeThemeData(value != null
+                  ? ThemeType.values[value]
+                  : ThemeType.THEME_PINK),
+            );
+          },
+        );
       },
     );
   }
@@ -109,7 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 flex: 2,
                 child: coupleImages(),
               ),
-              Expanded(flex: 1, child: relationshipTimeView()),
+              Expanded(
+                flex: 1,
+                child: relationshipTimeView(),
+              ),
             ],
           ),
         ),
@@ -122,9 +139,12 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _statusBarColor = generateColors.getColor(STATUS_BAR_COLOR);
       _progressBarColor = generateColors.getColor(PROGRESS_COLOR);
-     _progressBarBgColor = generateColors.getColor(PROGRESS_BG_COLOR);
+      _progressBarBgColor = generateColors.getColor(PROGRESS_BG_COLOR);
       _iconColorLight = generateColors.getColor(ICON_COLOR_LIGHT);
       _totalDayColor = generateColors.getColor(TOTAL_DAY_COLOR);
+      _placeHolderBgColor = generateColors.getColor(BODY_BG_COLOR);
+      _placeHolderBorderColor = generateColors.getColor(ICON_COLOR_LIGHT);
+      _placeHolderIconColor = generateColors.getColor(PROGRESS_COLOR);
     });
     setPrefInt(SHARE_PREF_THEME, themeColorData.index);
   }
@@ -205,18 +225,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         elevation: 1.0,
         child: _personImage == null
-            ? Container(
-                width: 160,
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                  color: Colors.yellow
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.person,
-                  ),
-                ),
+            ? PersonPlaceHolder(
+                _placeHolderBgColor,
+                _placeHolderBorderColor,
+                _placeHolderIconColor,
               )
             : Container(
                 width: 160,
@@ -239,14 +251,49 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Container(
         child: Column(
           children: [
-            Text(
-              "Together for",
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xff7E7175),
-                fontFamily: "Montserrat",
-              ),
-            ),
+            _person1Name == null || _person2Name == null
+                ? Text(
+                    "Together for",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xff7E7175),
+                      fontFamily: "Montserrat",
+                    ),
+                  )
+                : Container(
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _person1Name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xff7E7175),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Icon(
+                          Icons.favorite,
+                          size: 8.0,
+                          color: Colors.red,
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Text(
+                          _person2Name,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xff7E7175),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
             SizedBox(
               height: 12,
             ),
@@ -336,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     backgroundColor: _progressBarBgColor,
                     percent: progressPercent,
                     animation: true,
-                  ) ,
+                  ),
                 ],
               ),
             )
@@ -358,15 +405,21 @@ class _MyHomePageState extends State<MyHomePage> {
               .then((value) => _personOneImage = value);
           getImage(SHARE_PREF_PERSON_2_IMAGE)
               .then((value) => _personTwoImage = value);
-          getRelationTime(SHARE_PREF_RS_DATE).then((value) => {
-                _selectedDate = value,
-                totalRelationDays = getTotalDate(_selectedDate),
-                relationShipTime = getDifferentYear(_selectedDate),
-                progressStartValue = getProgressStartValue(),
-                progressEndValue = getProgressEndValue(),
-                progressPercent = (totalRelationDays - progressStartValue) /
-                    (progressEndValue - progressStartValue)
-              });
+          getString(SHARE_PREF_PERSON_1_NAME)
+              .then((value) => {_person1Name = value});
+          getString(SHARE_PREF_PERSON_2_NAME)
+              .then((value) => {_person2Name = value});
+          getRelationTime(SHARE_PREF_RS_DATE).then(
+            (value) => {
+              _selectedDate = value,
+              totalRelationDays = getTotalDate(_selectedDate),
+              relationShipTime = getDifferentYear(_selectedDate),
+              progressStartValue = getProgressStartValue(),
+              progressEndValue = getProgressEndValue(),
+              progressPercent = (totalRelationDays - progressStartValue) /
+                  (progressEndValue - progressStartValue)
+            },
+          );
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS).then(
             (value) => _isShowTotalDate = value,
           );

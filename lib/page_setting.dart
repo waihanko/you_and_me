@@ -11,8 +11,9 @@ import 'package:you_and_me/generate_color.dart';
 import 'package:you_and_me/resources/enum.dart';
 import 'package:you_and_me/resources/string.dart';
 import 'package:you_and_me/utils.dart';
-
+import 'preson_placeholder.dart';
 import 'resources/colors.dart';
+import 'widget_input_dialog.dart';
 
 class Setting extends StatefulWidget {
   @override
@@ -21,10 +22,11 @@ class Setting extends StatefulWidget {
 
 class _SettingState extends State<Setting> {
   bool _isShowDaySwitched = false;
-  bool isNotificationSwitched = false;
   bool isRemindMeSwitched = false;
   bool isWidgetSwitched = false;
   DateTime _selectedDate = DateTime.now();
+  String _person1Name = "Adam";
+  String _person2Name = "Eve";
   File _personOneImage;
   File _personTwoImage;
   Color _bgColor;
@@ -33,6 +35,11 @@ class _SettingState extends State<Setting> {
   Color _totalDayColor;
   Color _iconColorLight;
   Color _iconColorDeep;
+  Color _placeHolderBgColor;
+  Color _placeHolderBorderColor;
+  Color _placeHolderIconColor;
+  TextEditingController name1EditingController = TextEditingController();
+  TextEditingController name2EditingController = TextEditingController();
 
   final DateFormat formatter = DateFormat('dd/MM/yyyy');
 
@@ -51,6 +58,10 @@ class _SettingState extends State<Setting> {
               .then((value) => _selectedDate = value);
           getBoolean(SHARE_PREF_IS_SHOW_TOTAL_DAYS)
               .then((value) => _isShowDaySwitched = value);
+          getString(SHARE_PREF_PERSON_1_NAME).then((value) =>
+              value == null ? _person1Name = "Adam" : _person1Name = value);
+          getString(SHARE_PREF_PERSON_2_NAME).then((value) =>
+              value == null ? _person2Name = "Eve" : _person2Name = value);
         });
         getPrefInt(SHARE_PREF_THEME).then(
           (value) => changeThemeData(
@@ -71,6 +82,7 @@ class _SettingState extends State<Setting> {
           return Future.value(false);
         },
         child: Scaffold(
+          backgroundColor: _cardColor,
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             elevation: 0,
@@ -105,9 +117,8 @@ class _SettingState extends State<Setting> {
             ),
             centerTitle: true,
           ),
-          body: Container(
+          body: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 18),
-            color: _cardColor,
             child: Column(
               children: [
                 Card(
@@ -139,12 +150,10 @@ class _SettingState extends State<Setting> {
                         Row(
                           children: [
                             personPhoto(
-                              PLACE_HOLDER_PERSON_1_IMAGE,
                               _personOneImage,
                               SHARE_PREF_PERSON_1_IMAGE,
                             ),
                             personPhoto(
-                              PLACE_HOLDER_PERSON_2_IMAGE,
                               _personTwoImage,
                               SHARE_PREF_PERSON_2_IMAGE,
                             ),
@@ -239,7 +248,7 @@ class _SettingState extends State<Setting> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Notification",
+                          "Nick Name",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -251,55 +260,87 @@ class _SettingState extends State<Setting> {
                         Row(
                           children: [
                             Text(
-                              "Remind me",
+                              _person1Name,
                               style: TextStyle(
                                 fontSize: 14,
                               ),
                             ),
                             Spacer(),
-                            FlutterSwitch(
-                              width: 40.0,
-                              height: 20.0,
-                              toggleSize: 16.0,
-                              activeColor: _iconColorDeep,
-                              inactiveColor: _iconColorLight,
-                              value: isRemindMeSwitched,
-                              borderRadius: 30.0,
-                              onToggle: (val) {
-                                setState(() {
-                                  isRemindMeSwitched = val;
-                                  setBoolean("remind_me", val);
-                                });
-                              },
+                            ClipOval(
+                              child: Material(
+                                color: _bgColor,
+                                child: InkWell(
+                                  splashColor: _bgColor,
+                                  child: SizedBox(
+                                      width: 38,
+                                      height: 38,
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: _iconColorLight,
+                                        size: 16,
+                                      )),
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return WidgetInputDialog(
+                                          name1EditingController,
+                                          _person1Name,
+                                          _iconColorDeep,
+                                          _placeHolderBorderColor,
+                                          _placeHolderBgColor,
+                                          savePerson1Name,
+                                        );
+                                      },
+                                    );
+                                    //_chooseName(SHARE_PREF_PERSON_1_NAME);
+                                  },
+                                ),
+                              ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: 16,
+                          height: 8,
                         ),
                         Row(
                           children: [
                             Text(
-                              "Widget",
+                              _person2Name,
                               style: TextStyle(
                                 fontSize: 14,
                               ),
                             ),
                             Spacer(),
-                            FlutterSwitch(
-                              width: 40.0,
-                              height: 20.0,
-                              toggleSize: 16.0,
-                              activeColor: _iconColorDeep,
-                              inactiveColor: _iconColorLight,
-                              value: isWidgetSwitched,
-                              borderRadius: 30.0,
-                              onToggle: (val) {
-                                setState(() {
-                                  isWidgetSwitched = val;
-                                  setBoolean("widget", val);
-                                });
-                              },
+                            ClipOval(
+                              child: Material(
+                                color: _bgColor,
+                                child: InkWell(
+                                  splashColor: _bgColor,
+                                  child: SizedBox(
+                                      width: 38,
+                                      height: 38,
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: _iconColorLight,
+                                        size: 16,
+                                      )),
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return WidgetInputDialog(
+                                            name2EditingController,
+                                            _person2Name,
+                                            _iconColorDeep,
+                                            _placeHolderBorderColor,
+                                            _placeHolderBgColor,
+                                            savePerson2Name);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -360,6 +401,16 @@ class _SettingState extends State<Setting> {
                     ),
                   ),
                 ),
+                SizedBox(height: 16,),
+                Center(
+                  child: Text(
+                    "version 1.0",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -368,28 +419,35 @@ class _SettingState extends State<Setting> {
     );
   }
 
-  personPhoto(String image, File _personImage, String imageName) {
+  personPhoto(File _personImage, String imageName) {
     return GestureDetector(
-      onTap: () => {_pickImageFromGallery(imageName)},
+      onTap: () => _pickImageFromGallery(imageName),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12.0)),
         ),
         elevation: 1.0,
-        child: Container(
-          width: 80,
-          height: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(12.0)),
-            image: DecorationImage(
-              image: _personImage == null
-                  ? AssetImage(image)
-                  : FileImage(_personImage),
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-        ),
+        child: _personImage == null
+            ? PersonPlaceHolder(
+                _placeHolderBgColor,
+                _placeHolderBorderColor,
+                _placeHolderIconColor,
+                imageWidth: 80,
+                imageHeight: 100,
+                iconSize: 24,
+              )
+            : Container(
+                width: 80,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                  image: DecorationImage(
+                    image: FileImage(_personImage),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -452,8 +510,29 @@ class _SettingState extends State<Setting> {
       _iconColorLight = generateColors.getColor(ICON_COLOR_LIGHT);
       _totalDayColor = generateColors.getColor(TOTAL_DAY_COLOR);
       _cardColor = generateColors.getColor(CARD_COLOR);
+      _placeHolderBgColor = generateColors.getColor(BODY_BG_COLOR);
+      _placeHolderBorderColor = generateColors.getColor(ICON_COLOR_LIGHT);
+      _placeHolderIconColor = generateColors.getColor(PROGRESS_COLOR);
     });
     setPrefInt(SHARE_PREF_THEME, themeColorData.index);
+  }
+
+  savePerson2Name(String person2Name) {
+    setString(SHARE_PREF_PERSON_2_NAME, person2Name);
+    setState(
+      () {
+        _person2Name = person2Name;
+      },
+    );
+  }
+
+  savePerson1Name(String person1Name) {
+    setString(SHARE_PREF_PERSON_1_NAME, person1Name);
+    setState(
+      () {
+        _person1Name = person1Name;
+      },
+    );
   }
 }
 

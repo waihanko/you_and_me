@@ -30,6 +30,7 @@ dependencies:
   shared_preferences: ^0.5.12+4
   path_provider: ^1.6.24
   jiffy: ^4.1.0
+  font_awesome_flutter: ^9.0.0
 
 
 

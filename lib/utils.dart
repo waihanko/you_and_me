@@ -19,6 +19,17 @@ Future<bool> getBoolean(String key) async {
   return prefs.getBool(key);
 }
 
+Future<String> getString(String key) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key);
+}
+
+
+setString(String key, String data) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString(key, data);
+}
+
 setBoolean(String key, bool state) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setBool(key, state);

@@ -34,7 +34,7 @@ const greenColor = {
   NORMAL_TEXT_COLOR: Color(0xff000000),
   TOTAL_DAY_COLOR: Color(0xff728d2c),
   PROGRESS_COLOR: Color(0xff728d2c),
-  PROGRESS_BG_COLOR: Color(0xffe8ffb2),
+  PROGRESS_BG_COLOR: Color(0xffbed48b),
   CARD_COLOR: Color(0xfff3fcf5),
 };
 
