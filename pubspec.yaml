@@ -31,8 +31,19 @@ dependencies:
   path_provider: ^1.6.24
   jiffy: ^4.1.0
   font_awesome_flutter: ^9.0.0
+  flutter_launcher_icons: ^0.9.0
+  ffi: ^1.0.0
 
-
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/icon.png"
+#    image_path_android: "assets/images/icon-710x599-android.png"
+#    image_path_ios: "assets/images/icon-710x599-ios.png"
+#    android: true # can specify file name here e.g. "ic_launcher"
+#    ios: true # can specify file name here e.g. "My-Launcher-Icon"
+#    adaptive_icon_background: "assets/images/christmas-background.png" # only available for Android 8.0 devices and above
+#    adaptive_icon_foreground: "assets/images/icon-foreground-432x432.png" # only available for Android 8.0 devices and above
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
